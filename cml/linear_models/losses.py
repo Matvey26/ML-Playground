@@ -1,8 +1,8 @@
 """
 >>> cml.linear_models.losses
 
-Loss functions in which a regularizer can be embedded.
-They are used more for training models than for calculating metrics.
+Функции потерь, в которые можно встроить регуляризатор.
+Они используются больше для обучения моделей, чем для расчета метрик.
 """
 
 import numpy as np
@@ -11,13 +11,13 @@ from .regularizers import BaseRegularizer
 
 class BaseLoss:
     """
-    Base class for loss functions with an optional regularizer.
+    Базовый класс для функций потерь с опциональным регуляризатором.
 
-    Parameters
-    ----------
-    regularizer : BaseRegularizer, optional
-        Regularizer object to be used in the loss calculation. Default is an instance of 
-        BaseRegularizer with a regularization strength of 0.
+    Параметры
+    ---------
+    regularizer : BaseRegularizer, опционально
+        Объект регуляризатора, который будет использоваться в расчете функции потерь. 
+        По умолчанию используется экземпляр BaseRegularizer с коэффициентом регуляризации 0.
     """
 
     def __init__(self, regularizer: BaseRegularizer = BaseRegularizer(0)):
@@ -25,50 +25,47 @@ class BaseLoss:
 
     def calc_loss(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.float64:
         """
-        Calculates the loss value for a given dataset, targets, and model weights, 
-        incorporating the regularization term if provided.
+        Вычисляет значение функции потерь для заданного набора данных, целевых значений и весов модели,
+        включая регуляризационный член, если он предоставлен.
 
-        Parameters
-        ----------
+        Параметры
+        ---------
         X : np.ndarray
-            Training sample, a 2D array with a shape of (N, D + 1), where N is the number 
-            of samples and D is the number of features. The first column X[:, 0] 
-            is typically reserved for the intercept (constant feature).
+            Обучающая выборка, 2D массив размером (N, D), где N - размер выборки,
+            а D - количество признаков. Первый столбец X[:, 0] обычно зарезервирован для интерсепта (постоянный признак).
         y : np.ndarray
-            Target values, a 1D array of length N, where N is the number of samples.
+            Целевые значения, 1D массив длины N, где N - размер выборки.
         w : np.ndarray
-            Weights of the linear model, a 1D array of length D, where D is the number 
-            of features. The first element w[0] typically represents the intercept.
+            Веса линейной модели, 1D массив длины D, где D - количество признаков.
+            Первый элемент w[0] обычно представляет интерсепт.
 
-        Returns
-        -------
+        Возвращает
+        ----------
         np.float64
-            The computed loss value, including the regularization term if applicable.
+            Вычисленное значение функции потерь, включая регуляризационный член, если он указан.
         """
         return 0
 
     def calc_grad(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.ndarray:
         """
-        Calculates the gradient of the loss function with respect to the model weights, 
-        incorporating the gradient of the regularization term if provided.
+        Вычисляет градиент функции потерь по отношению к весам модели,
+        включая градиент регуляризационного члена, если он предоставлен.
 
-        Parameters
-        ----------
+        Параметры
+        ---------
         X : np.ndarray
-            Training sample, a 2D array with a shape of (N, D + 1), where N is the number 
-            of samples and D is the number of features. The first column X[:, 0] 
-            is typically reserved for the intercept (constant feature).
+            Обучающая выборка, 2D массив размером (N, D), где N - размер выборки,
+            а D - количество признаков. Первый столбец X[:, 0] обычно зарезервирован для интерсепта (постоянный признак).
         y : np.ndarray
-            Target values, a 1D array of length N, where N is the number of samples.
+            Целевые значения, 1D массив длины N, где N - размер выборки.
         w : np.ndarray
-            Weights of the linear model, a 1D array of length D, where D is the number 
-            of features. The first element w[0] typically represents the intercept.
+            Веса линейной модели, 1D массив длины D, где D - количество признаков.
+            Первый элемент w[0] обычно представляет интерсепт.
 
-        Returns
-        -------
+        Возвращает
+        ----------
         np.ndarray
-            The gradient of the loss function with respect to the weights, a 1D array 
-            of length D.
+            Градиент функции потерь по отношению к весам, 1D массив длины D.
         """
         return w * 0
 

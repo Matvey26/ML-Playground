@@ -1,7 +1,7 @@
 """
 >>> cml.linear_models.optimizers
 
-The implementation of various optimizers that can be used to train a linear model.
+Реализация различных оптимизаторов, которые могут быть использованы для обучения линейной модели.
 """
 
 import numpy as np
@@ -18,35 +18,34 @@ def gradient_descent(
     save_path: bool = False
 ) -> np.ndarray:
     """
-    Performs classic gradient descent optimization.
+    Выполняет классическую оптимизацию методом градиентного спуска.
 
-    Parameters
-    ----------
+    Параметры
+    ---------
     X : np.ndarray
-        Training data, a 2D array with shape (N, D + 1), where N is the number of samples
-        and D is the number of features. The first column is typically
-        reserved for the intercept.
+        Обучающие данные, 2D массив размером (N, D), где N - размер выборки,
+        а D - количество признаков. Первый столбец обычно зарезервирован для интерсепта.
     y : np.ndarray
-        Target values, a 1D array of length N, where N is the number of samples.
+        Целевые значения, 1D массив длины N, где N - размер выборки.
     w_init : np.ndarray
-        Initial weights, a 1D array of length D, where D is the number of features. The first 
-        element is typically the intercept.
+        Начальные веса, 1D массив длины D, где D - количество признаков. Первый элемент 
+        обычно представляет интерсепт.
     loss : BaseLoss
-        Loss function object to compute the gradient.
-    learning_rate : callable, optional
-        Hyperparameter that defines the learning rate as a function of the iteration number. 
-        Default is a constant learning rate of 0.001.
-    n_iterations : int, optional
-        Number of gradient descent iterations. Default is 10,000.
-    save_path : bool, optional
-        If True, the function saves all intermediate weights during training and returns 
-        a list of these weights. Default is False.
+        Объект функции потерь для вычисления градиента.
+    learning_rate : callable, опционально
+        Гиперпараметр, который определяет скорость обучения как функцию от номера итерации. 
+        По умолчанию это постоянная скорость обучения 0.001.
+    n_iterations : int, опционально
+        Количество итераций градиентного спуска. По умолчанию 10,000.
+    save_path : bool, опционально
+        Если True, функция сохраняет все промежуточные веса во время обучения и возвращает 
+        список этих весов. По умолчанию False.
 
-    Returns
-    -------
-    np.ndarray or list
-        The final weights after optimization if `save_path` is False, or a list of weight 
-        arrays from each iteration if `save_path` is True.
+    Возвращает
+    ----------
+    np.ndarray или list
+        Конечные веса после оптимизации, если `save_path == Fasse`, или список 
+        массивов весов для каждой итерации, если `save_path == True`.
     """
     w_prev = w_init.copy()
     path = []
@@ -69,43 +68,43 @@ def stochastic_gradient_descent(
     y: np.ndarray,
     w_init: np.ndarray,
     loss: BaseLoss,
-    batch_size: int = 100,
+    batch_size: int,
     learning_rate: callable = lambda k: 0.001,
     n_epoch: int = 100,
     save_path: bool = False
 ) -> np.ndarray:
     """
-    Performs stochastic gradient descent (SGD) optimization.
+    Выполняет оптимизацию методом стохастического градиентного спуска (SGD).
 
-    Parameters
-    ----------
+    Параметры
+    ---------
     X : np.ndarray
-        Training data, a 2D array with shape (N, D), where N is the number of samples and 
-        D is the number of features. The first column is typically reserved for the intercept.
+        Обучающие данные, 2D массив размером (N, D), где N - размер выборки,
+        а D - количество признаков. Первый столбец обычно зарезервирован для интерсепта.
     y : np.ndarray
-        Target values, a 1D array of length N, where N is the number of samples.
+        Целевые значения, 1D массив длины N, где N - количество выборок.
     w_init : np.ndarray
-        Initial weights, a 1D array of length D, where D is the number of features. The first 
-        element is typically the intercept.
+        Начальные веса, 1D массив длины D, где D - количество признаков. Первый элемент 
+        обычно представляет интерсепт.
     loss : BaseLoss
-        Loss function object to compute the gradient.
-    batch_size : int, optional
-        Size of the mini-batch used to estimate the gradient. Default is 100.
-    learning_rate : callable, optional
-        Hyperparameter that defines the learning rate as a function of the iteration number. 
-        Default is a constant learning rate of 0.001.
-    n_epoch : int, optional
-        Number of epochs for training, where one epoch means one full pass over the dataset. 
-        Default is 100.
-    save_path : bool, optional
-        If True, the function saves all intermediate weights during training and returns 
-        a list of these weights. Default is False.
+        Объект функции потерь для вычисления градиента.
+    batch_size : int
+        Размер мини-батча, используемого для оценки градиента.
+    learning_rate : callable, опционально
+        Гиперпараметр, который определяет скорость обучения как функцию номера итерации. 
+        По умолчанию это постоянная скорость обучения 0.001.
+    n_epoch : int, опционально
+        Количество эпох обучения, где одна эпоха означает полный проход по всему набору данных. 
+        По умолчанию 100.
+    save_path : bool, опционально
+        Если True, функция сохраняет все промежуточные веса во время обучения и возвращает 
+        список этих весов. По умолчанию False.
 
-    Returns
-    -------
-    np.ndarray or list
-        The final weights after optimization if `save_path` is False, or a list of weight 
-        arrays from each epoch if `save_path` is True.
+    Возвращает
+    ----------
+    np.ndarray или list
+        Конечные веса после оптимизации, если `save_path == False`, или список 
+        массивов весов для каждой эпохи, если `save_path == True`.
     """
     shuffled_indices = np.arange(X.shape[0])
     np.random.shuffle(shuffled_indices)

@@ -1,7 +1,7 @@
 """
 >>> cml.linear_models.regularizers
 
-Regularizers that can be integrated into your loss functions
+Регуляризаторы, которые могут быть встроены в функции потерь
 """
 
 import numpy as np
@@ -9,12 +9,12 @@ import numpy as np
 
 class BaseRegularizer:
     """
-    Base class for regularizers used in loss functions.
+    Базовый класс для регуляризаторов, используемых в функциях потерь.
 
-    Parameters
-    ----------
+    Параметры
+    ---------
     coef : float
-        Regularization coefficient that scales the regularization term.
+        Коэффициент регуляризации, который масштабирует регуляризационный член.
     """
 
     def __init__(self, coef: float):
@@ -22,39 +22,39 @@ class BaseRegularizer:
 
     def calc_reg(self, w: np.ndarray, ignore_first: bool = True) -> np.float64:
         """
-        Computes the regularization term based on the weights and the regularization coefficient.
+        Вычисляет регуляризационный член на основе весов и коэффициента регуляризации.
 
-        Parameters
-        ----------
+        Параметры
+        ---------
         w : np.ndarray
-            A 1D array of model weights.
-        ignore_first : bool, optional
-            If True, the first element of the weights array is considered as an intercept and is not included 
-            in the regularization calculation. Default is True.
+            1D массив весов модели.
+        ignore_first : bool, опционально
+            Если True, первый элемент массива весов считается интерсептом и не включается 
+            в расчет регуляризации. По умолчанию True.
 
-        Returns
-        -------
+        Возвращает
+        ----------
         np.float64
-            The computed regularization term.
+            Вычисленный регуляризационный член.
         """
         return 0
 
     def calc_grad(self, w: np.ndarray, ignore_first: bool = True) -> np.ndarray:
         """
-        Calculates the gradient of the regularization term with respect to the weights.
+        Вычисляет градиент регуляризационного члена по отношению к весам.
 
-        Parameters
-        ----------
+        Параметры
+        ---------
         w : np.ndarray
-            A 1D array of model weights.
-        ignore_first : bool, optional
-            If True, the gradient calculation excludes the first element of the weights array, assuming it is 
-            an intercept. Default is True.
+            1D массив весов модели.
+        ignore_first : bool, опционально
+            Если True, расчет градиента исключает первый элемент массива весов, считая его 
+            интерсептом. По умолчанию True.
 
-        Returns
-        -------
+        Возвращает
+        ----------
         np.ndarray
-            A 1D array containing the gradient of the regularization term with respect to each weight.
+            1D массив, содержащий градиент регуляризационного члена по отношению к каждому весу.
         """
         return w * 0
 
