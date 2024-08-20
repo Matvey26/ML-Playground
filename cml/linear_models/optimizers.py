@@ -1,11 +1,12 @@
 """
 >>> cml.linear_models.optimizers
 
-The implementation of various optimizers that can be used to train a linear model.
+Реализация различных оптимизаторов, которые могут быть использованы для обучения линейной модели.
 """
 
 import numpy as np
 from .losses import BaseLoss
+from typing import Callable, Any
 
 
 def gradient_descent(
@@ -13,55 +14,51 @@ def gradient_descent(
     y: np.ndarray,
     w_init: np.ndarray,
     loss: BaseLoss,
-    learning_rate: callable = lambda k: 0.001,
-    n_iterations: int = 10000,
-    save_path: bool = False
+    learning_rate: Callable[[int], float] = lambda k: 0.001,
+    stop_function: Callable[[np.ndarray, int], bool] = lambda w, k: k < 10_000,
+    callback: Callable[[np.ndarray, int], Any] = lambda w, k: None
+
 ) -> np.ndarray:
     """
-    Performs classic gradient descent optimization.
+    Выполняет классическую оптимизацию методом градиентного спуска.
 
-    Parameters
+    Параметры
+    ---------
+    `X : np.ndarray`
+        Обучающие данные, 2D массив размером (N, D), где N - размер выборки,
+        а D - количество признаков. Первый столбец обычно зарезервирован для интерсепта.
+    `y : np.ndarray`
+        Целевые значения, 1D массив длины N, где N - размер выборки.
+    `w_init : np.ndarray`
+        Начальные веса, 1D массив длины D, где D - количество признаков. Первый элемент 
+        обычно представляет интерсепт.
+    `loss : BaseLoss`
+        Объект функции потерь для вычисления градиента.
+    `learning_rate : Callable[[int], float]`, опционально
+        Гиперпараметр, который определяет скорость обучения как функцию от номера итерации. 
+        По умолчанию это постоянная скорость обучения 0.001.
+    `stop_function : Callable[[np.ndarray, int], bool]`, опционально
+        Правило остановки градиентного спуска, функция, которая принимает на вход веса и
+        номер итерации и возвращает булево значение. По умолчанию `lambda w, k: k < 10_000`
+    `callback: Callable[[np.ndarray, int], Any]`, опционально
+        Функция, которая вызывается на каждой итерации градиентного спуска, принимает веса
+        и номер итерации.
+
+    Возвращает
     ----------
-    X : np.ndarray
-        Training data, a 2D array with shape (N, D + 1), where N is the number of samples
-        and D is the number of features. The first column is typically
-        reserved for the intercept.
-    y : np.ndarray
-        Target values, a 1D array of length N, where N is the number of samples.
-    w_init : np.ndarray
-        Initial weights, a 1D array of length D, where D is the number of features. The first 
-        element is typically the intercept.
-    loss : BaseLoss
-        Loss function object to compute the gradient.
-    learning_rate : callable, optional
-        Hyperparameter that defines the learning rate as a function of the iteration number. 
-        Default is a constant learning rate of 0.001.
-    n_iterations : int, optional
-        Number of gradient descent iterations. Default is 10,000.
-    save_path : bool, optional
-        If True, the function saves all intermediate weights during training and returns 
-        a list of these weights. Default is False.
-
-    Returns
-    -------
-    np.ndarray or list
-        The final weights after optimization if `save_path` is False, or a list of weight 
-        arrays from each iteration if `save_path` is True.
+    np.ndarray
+        Конечные веса после оптимизации.
     """
-    w_prev = w_init.copy()
-    path = []
-    if save_path:
-        path.append(w_init)
+    w = w_init.copy()
+    callback(w, -1)
+    
+    i = 0
+    while stop_function(w, i):
+        w -= learning_rate(i) * loss.calc_grad(X, y, w)
+        callback(w, i)
+        i += 1
 
-    for i in range(n_iterations):
-        w_cur = w_prev - learning_rate(i) * loss.calc_grad(X, y, w_prev)
-        if save_path:
-            path.append(w_cur)
-        w_prev = w_cur
-
-    if save_path:
-        return path
-    return w_prev
+    return w
 
 
 def stochastic_gradient_descent(
@@ -69,67 +66,62 @@ def stochastic_gradient_descent(
     y: np.ndarray,
     w_init: np.ndarray,
     loss: BaseLoss,
-    batch_size: int = 100,
-    learning_rate: callable = lambda k: 0.001,
-    n_epoch: int = 100,
-    save_path: bool = False
+    batch_size: int,
+    learning_rate: Callable[[int], float] = lambda k: 0.001,
+    stop_function: Callable[[np.ndarray, int], bool] = lambda w, k: k < 10_000,
+    callback: Callable[[np.ndarray, int], Any] = lambda w, k: None
 ) -> np.ndarray:
     """
-    Performs stochastic gradient descent (SGD) optimization.
+    Выполняет оптимизацию методом стохастического градиентного спуска (SGD).
 
-    Parameters
-    ----------
+    Параметры
+    ---------
     X : np.ndarray
-        Training data, a 2D array with shape (N, D), where N is the number of samples and 
-        D is the number of features. The first column is typically reserved for the intercept.
+        Обучающие данные, 2D массив размером (N, D), где N - размер выборки,
+        а D - количество признаков. Первый столбец обычно зарезервирован для интерсепта.
     y : np.ndarray
-        Target values, a 1D array of length N, where N is the number of samples.
+        Целевые значения, 1D массив длины N, где N - количество выборок.
     w_init : np.ndarray
-        Initial weights, a 1D array of length D, where D is the number of features. The first 
-        element is typically the intercept.
+        Начальные веса, 1D массив длины D, где D - количество признаков. Первый элемент 
+        обычно представляет интерсепт.
     loss : BaseLoss
-        Loss function object to compute the gradient.
-    batch_size : int, optional
-        Size of the mini-batch used to estimate the gradient. Default is 100.
-    learning_rate : callable, optional
-        Hyperparameter that defines the learning rate as a function of the iteration number. 
-        Default is a constant learning rate of 0.001.
-    n_epoch : int, optional
-        Number of epochs for training, where one epoch means one full pass over the dataset. 
-        Default is 100.
-    save_path : bool, optional
-        If True, the function saves all intermediate weights during training and returns 
-        a list of these weights. Default is False.
+        Объект функции потерь для вычисления градиента.
+    batch_size : int
+        Размер мини-батча, используемого для оценки градиента.
+    learning_rate : Callable[[int], float], опционально
+        Гиперпараметр, который определяет скорость обучения как функцию номера итерации. 
+        По умолчанию это постоянная скорость обучения 0.001.
+    stop_function : Callable[[np.ndarray, int], bool], опционально
+        Правило остановки SGD, функция, которая принимает на вход веса и номер итерации
+        и возвращает булево значение. По умолчанию `lambda w, k: k < 10_000`
+    callback : Callable[[np.ndarray, int], Any], опционально
+        Функция, которая вызывается на каждой итерации SGD, принимает веса и номер итерации.
 
-    Returns
-    -------
-    np.ndarray or list
-        The final weights after optimization if `save_path` is False, or a list of weight 
-        arrays from each epoch if `save_path` is True.
+    Возвращает
+    ----------
+    np.ndarray
+        Конечные веса после оптимизации.
     """
     shuffled_indices = np.arange(X.shape[0])
     np.random.shuffle(shuffled_indices)
 
-    Xs = X.copy()[shuffled_indices]
-    ys = y.copy()[shuffled_indices]
+    Xs = X[shuffled_indices]
+    ys = y[shuffled_indices]
 
-    w_prev = w_init.copy()
-    path = []
-    if save_path:
-        path.append(w_init)
-
+    w = w_init.copy()
+    callback(w, -1)
+    
     k = 0
-    for _ in range(n_epoch):
+    while stop_function(w, k):
         for i in range(0, X.shape[0], batch_size):
             X_batch = Xs[i:i+batch_size]
             y_batch = ys[i:i+batch_size]
-            w_cur = w_prev - learning_rate(k) * loss.calc_grad(X_batch, y_batch, w_prev)
-            if save_path:
-                path.append(w_cur)
-            w_prev = w_cur
-
+            
+            w -= learning_rate(k) * loss.calc_grad(X_batch, y_batch, w)
+            callback(w, k)
             k += 1
 
-    if save_path:
-        return path
-    return w_prev
+            if not stop_function(w, k):
+                break
+
+    return w

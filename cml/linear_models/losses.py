@@ -1,8 +1,8 @@
 """
 >>> cml.linear_models.losses
 
-Loss functions in which a regularizer can be embedded.
-They are used more for training models than for calculating metrics.
+Функции потерь с возможностью добавления регуляризации.
+Используются в основном для обучения моделей, а не для оценки метрик.
 """
 
 import numpy as np
@@ -11,13 +11,13 @@ from .regularizers import BaseRegularizer
 
 class BaseLoss:
     """
-    Base class for loss functions with an optional regularizer.
+    Базовый класс для функций потерь с возможностью регуляризации.
 
-    Parameters
-    ----------
-    regularizer : BaseRegularizer, optional
-        Regularizer object to be used in the loss calculation. Default is an instance of 
-        BaseRegularizer with a regularization strength of 0.
+    Параметры
+    ---------
+    regularizer : BaseRegularizer, опционально
+        Объект регуляризатора, который используется для расчета функции потерь. 
+        По умолчанию BaseRegularizer(0).
     """
 
     def __init__(self, regularizer: BaseRegularizer = BaseRegularizer(0)):
@@ -25,62 +25,67 @@ class BaseLoss:
 
     def calc_loss(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.float64:
         """
-        Calculates the loss value for a given dataset, targets, and model weights, 
-        incorporating the regularization term if provided.
+        Вычисляет значение функции потерь с учетом регуляризации.
 
-        Parameters
-        ----------
+        Параметры
+        ---------
         X : np.ndarray
-            Training sample, a 2D array with a shape of (N, D + 1), where N is the number 
-            of samples and D is the number of features. The first column X[:, 0] 
-            is typically reserved for the intercept (constant feature).
+            Матрица признаков, 2D массив размером (N, D), где N — размер выборки,
+            а D — количество признаков. Обычно первый столбец X[:, 0] отвечает за константу (интерсепт).
         y : np.ndarray
-            Target values, a 1D array of length N, where N is the number of samples.
+            Вектор ответов (целевых значений), 1D массив длины N, где N — размер выборки.
         w : np.ndarray
-            Weights of the linear model, a 1D array of length D, where D is the number 
-            of features. The first element w[0] typically represents the intercept.
+            Вектор весов модели, 1D массив длины D, где D — количество признаков.
+            Первый элемент w[0] обычно представляет собой интерсепт.
 
-        Returns
-        -------
+        Возвращает
+        ----------
         np.float64
-            The computed loss value, including the regularization term if applicable.
+            Значение функции потерь с учетом регуляризации.
         """
         return 0
 
     def calc_grad(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.ndarray:
         """
-        Calculates the gradient of the loss function with respect to the model weights, 
-        incorporating the gradient of the regularization term if provided.
+        Вычисляет градиент функции потерь по отношению к весам модели с учетом регуляризации.
 
-        Parameters
-        ----------
+        Параметры
+        ---------
         X : np.ndarray
-            Training sample, a 2D array with a shape of (N, D + 1), where N is the number 
-            of samples and D is the number of features. The first column X[:, 0] 
-            is typically reserved for the intercept (constant feature).
+            Матрица признаков, 2D массив размером (N, D), где N — размер выборки,
+            а D — количество признаков. Обычно первый столбец X[:, 0] отвечает за константу (интерсепт).
         y : np.ndarray
-            Target values, a 1D array of length N, where N is the number of samples.
+            Вектор ответов (целевых значений), 1D массив длины N, где N — размер выборки.
         w : np.ndarray
-            Weights of the linear model, a 1D array of length D, where D is the number 
-            of features. The first element w[0] typically represents the intercept.
+            Вектор весов модели, 1D массив длины D, где D — количество признаков.
+            Первый элемент w[0] обычно представляет собой интерсепт.
 
-        Returns
-        -------
+        Возвращает
+        ----------
         np.ndarray
-            The gradient of the loss function with respect to the weights, a 1D array 
-            of length D.
+            Градиент функции потерь по отношению к весам, 1D массив длины D.
         """
         return w * 0
 
 
 class MSELoss(BaseLoss):
-    def calc_loss(self, X: np.ndarray, y: np.ndarray, w: np.ndarray):
+    """
+    Класс для функции потерь MSE (среднеквадратичная ошибка) с возможностью регуляризации.
+
+    Параметры
+    ---------
+    regularizer : BaseRegularizer, опционально
+        Объект регуляризатора, который используется для расчета функции потерь. 
+        По умолчанию используется экземпляр BaseRegularizer с нулевым коэффициентом регуляризации.
+    """
+
+    def calc_loss(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.float64:
         Q = np.mean((np.dot(X, w) - y) ** 2)
         R = self.regularizer.calc_reg(w)
 
         return Q + R
 
-    def calc_grad(self, X: np.ndarray, y: np.ndarray, w: np.ndarray):
+    def calc_grad(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.ndarray:
         err = np.dot(X, w) - y
         Q = 2 * np.dot(X.T, err) / len(y)
         R = self.regularizer.calc_grad(w)
@@ -89,15 +94,67 @@ class MSELoss(BaseLoss):
 
 
 class MAELoss(BaseLoss):
-    def calc_loss(self, X: np.ndarray, y: np.ndarray, w: np.ndarray):
+    """
+    Класс для функции потерь MAE (средняя абсолютная ошибка) с возможностью регуляризации.
+
+    Параметры
+    ---------
+    regularizer : BaseRegularizer, опционально
+        Объект регуляризатора, который используется для расчета функции потерь. 
+        По умолчанию используется экземпляр BaseRegularizer с нулевым коэффициентом регуляризации.
+    """
+
+    def calc_loss(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.float64:
         Q = np.mean(np.abs(np.dot(X, w) - y))
         R = self.regularizer.calc_reg(w)
 
         return Q + R
 
-    def calc_grad(self, X: np.ndarray, y: np.ndarray, w: np.ndarray):
+    def calc_grad(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.ndarray:
         err = np.dot(X, w) - y
         Q = np.dot(X.T, np.sign(err)) / len(y)
+        R = self.regularizer.calc_grad(w)
+
+        return Q + R
+
+
+class HuberLoss(BaseLoss):
+    """
+    Класс для функции потерь Хьюбера (Huber) с возможностью регуляризации.
+
+    Параметры
+    ---------
+    delta : float
+        Пороговое значение для функции потерь Хьюбера.
+    regularizer : BaseRegularizer, опционально
+        Объект регуляризатора, который используется для расчета функции потерь. 
+        По умолчанию BaseRegularizer(0).
+    """
+
+    def __init__(self, delta: float, regularizer: BaseRegularizer = BaseRegularizer(0)):
+        super().__init__(regularizer)
+        self.delta = delta
+
+    def calc_loss(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.float64:
+        z = np.dot(X, w) - y
+        phi = np.where(
+            np.abs(z) < self.delta,
+            0.5 * z ** 2,
+            self.delta * (np.abs(z) - 0.5 * self.delta)
+        )
+        Q = phi.mean()
+        R = self.regularizer.calc_reg(w)
+
+        return Q + R
+
+    def calc_grad(self, X: np.ndarray, y: np.ndarray, w: np.ndarray) -> np.ndarray:
+        z = np.dot(X, w) - y
+        phi = np.where(
+            np.abs(z) < self.delta,
+            z,
+            self.delta * np.sign(z)
+        )
+        Q = np.dot(X.T, phi) / len(y)
         R = self.regularizer.calc_grad(w)
 
         return Q + R
