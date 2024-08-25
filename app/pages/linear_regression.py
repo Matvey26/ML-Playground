@@ -3,8 +3,8 @@ import numpy as np
 import plotly.graph_objs as go
 from typing import Callable, Tuple
 
-# Нужные функции
 
+# Нужные функции
 
 def real_dependence(x: np.ndarray) -> np.ndarray:
     """Реальная зависимость y от x.
@@ -96,10 +96,28 @@ X, y = make_dataset(N, x_lim, real_dependence, noise_x, noise_y, outliers, outli
 
 plot = st.empty()
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=X[:, 0], y=y, mode='markers', opacity=0.4, line={'color': 'rgb(200, 200, 200)'}, name='Обучающая выборка'))
+
+fig.add_trace(go.Scatter(
+    x=X[:, 0],
+    y=y,
+    mode='markers',
+    opacity=0.4,
+    line={'color': 'rgb(200, 200, 200)'},
+    name='Обучающая выборка'
+))
+
 x_real = np.linspace(*x_lim, num=200)
 y_real = real_dependence(x_real)
-fig.add_trace(go.Scatter(x=x_real, y=y_real, mode='lines', opacity=0.7, line={'dash': 'dash', 'color': 'orange'}, name='Реальная зависимость'))
+
+fig.add_trace(go.Scatter(
+    x=x_real,
+    y=y_real,
+    mode='lines',
+    opacity=0.7,
+    line={'dash': 'dash', 'color': 'orange'},
+    name='Реальная зависимость'
+))
+
 fig.update_layout(width=600, height=500)
 
 plot.plotly_chart(fig, use_container_width=True)
