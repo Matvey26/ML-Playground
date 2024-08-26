@@ -168,3 +168,10 @@ class HuberLoss(BaseLoss):
         R = self.regularizer.calc_grad(w, ignore_first=is_first_intercept)
 
         return Q + R
+
+
+losses = {
+    'MAE': MAELoss,
+    'MSE': MSELoss,
+    'Huber': HuberLoss
+}

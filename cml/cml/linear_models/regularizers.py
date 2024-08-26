@@ -86,3 +86,10 @@ class L2Regularizer(BaseRegularizer):
         if ignore_first:
             g[0] = 0
         return g
+
+
+regularizers = {
+    'None': BaseRegularizer,
+    'L1': L1Regularizer,
+    'L2': L2Regularizer
+}
