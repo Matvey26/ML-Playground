@@ -20,6 +20,9 @@ class BaseRegularizer:
     def __init__(self, coef: float):
         self.coef_ = coef
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(coef={self.coef_})"
+
     def calc_reg(self, w: np.ndarray, ignore_first: bool = True) -> np.float64:
         """
         Вычисляет регуляризационный член на основе весов и коэффициента регуляризации.
