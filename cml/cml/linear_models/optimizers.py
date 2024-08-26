@@ -17,7 +17,6 @@ def gradient_descent(
     learning_rate: Callable[[int], float] = lambda k: 0.001,
     stop_function: Callable[[np.ndarray, int], bool] = lambda w, k: k < 10_000,
     callback: Callable[[np.ndarray, int], Any] = lambda w, k: None
-
 ) -> np.ndarray:
     """
     Выполняет классическую оптимизацию методом градиентного спуска.
@@ -125,3 +124,9 @@ def stochastic_gradient_descent(
                 break
 
     return w
+
+
+optimizers = {
+    'gradient_descent': gradient_descent,
+    'stochastic_gradient_descent': stochastic_gradient_descent
+}
