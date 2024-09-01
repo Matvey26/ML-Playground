@@ -111,12 +111,30 @@ with st.expander('Настроить модель'):
             optimizers.optimizers.keys()
         )
         optimizer = optimizers.optimizers[optimizer_name]
+        optimizer_kw = {}
+        if optimizer_name == 'stochastic_gradient_descent':
+            optimizer_kw['batch_size'] = st.slider(
+                'batch size',
+                min_value=1,
+                max_value=N,
+                step=10,
+                value=1
+            )
 
         loss_name = st.selectbox(
             'Функционал ошибки',
             losses.losses.keys()
         )
         loss = losses.losses[loss_name]
+        loss_kw = {}
+        if loss_name == 'Huber':
+            loss_kw['delta'] = 10 ** st.slider(
+                'log - delta (huber)',
+                min_value=-5.0,
+                max_value=5.0,
+                value=0.0,
+                step=0.1
+            )
 
         regularizer_name = st.selectbox(
             'Регуляризация',
@@ -209,8 +227,9 @@ plot.plotly_chart(fig, use_container_width=True)
 if is_start_learning:
     optimizer(
         X, y, np.ones(n_polinom + 1),
-        loss=loss(regularizer(reg_coef)),
+        loss=loss(regularizer(reg_coef), **loss_kw),
         learning_rate=lambda k: lmb * (s / (s + k)) ** p,
         stop_function=lambda _, k: k < n_iterations,
-        callback=callback
+        callback=callback,
+        **optimizer_kw
     )
